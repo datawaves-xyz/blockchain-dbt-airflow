@@ -1,0 +1,6 @@
+apache-airflow==2.2.2
+pydantic==1.9.0
+fal==0.2.12
+dbt-core==1.0.4
+dbt-spark[PyHive]==1.0.0
+pyaml==21.10.1
