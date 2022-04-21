@@ -1,5 +1,5 @@
-from dags.dbt_airflow.build_dbt_dag import DbtDagsBuilder
-from dags.variables import read_vars
+from dbt_airflow.build_dbt_dag import DbtDagsBuilder
+from variables import read_vars
 
 builder = DbtDagsBuilder(
     start_date='2022-06-13',

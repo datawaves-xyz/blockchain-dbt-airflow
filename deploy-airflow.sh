@@ -84,7 +84,7 @@ kubectl create namespace "$NAMESPACE"
 kubectl create secret generic airflow-database --from-literal=connection=postgresql+psycopg2://"$PG_URL" -n "$NAMESPACE"
 kubectl create secret generic airflow-result-database --from-literal=connection=db+postgresql://"$PG_URL" -n "$NAMESPACE"
 kubectl create secret generic airflow-webserver-secret --from-literal="webserver-secret-key=$(python3 -c 'import secrets; print(secrets.token_hex(16))')" -n "$NAMESPACE"
-helm upgrade --install airflow apache-airflow/airflow --namespace "$NAMESPACE" -f "$HELM_VALUE_YAML"
+helm upgrade --install airflow apache-airflow/airflow --namespace "$NAMESPACE" --timeout 10m0s -f "$HELM_VALUE_YAML"
 
 # Clean up temp folder
 rm -rf "$TEMP_DIR"

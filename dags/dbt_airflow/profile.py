@@ -5,8 +5,8 @@ from typing import TypeVar
 
 import pyaml
 
-from dags.dbt_airflow.credential import Credential, CredentialFactory
-from dags.variables import read_vars, parse_int
+from dbt_airflow.credential import Credential, CredentialFactory
+from variables import read_vars, parse_int
 
 C = TypeVar('C', bound=Credential)
 

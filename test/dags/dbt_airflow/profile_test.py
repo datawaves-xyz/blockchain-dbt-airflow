@@ -7,7 +7,7 @@ from unittest.mock import patch
 import yaml
 
 import test
-from dags.dbt_airflow.profile import Profile
+from dbt_airflow.profile import Profile
 
 RESOURCE_GROUP = 'profiles'
 

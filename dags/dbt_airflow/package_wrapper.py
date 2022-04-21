@@ -4,10 +4,11 @@ import pathlib
 import shutil
 from typing import List, Dict
 
-from faldbt.project import FalDbt, DbtModel, DbtTest
+from fal import FalDbt, DbtModel
+from faldbt.project import DbtTest
 
-from dags.dbt_airflow.git_cli import GitCli
-from dags.dbt_airflow.profile import Profile
+from dbt_airflow.git_cli import GitCli
+from dbt_airflow.profile import Profile
 
 
 class PackageWrapper:

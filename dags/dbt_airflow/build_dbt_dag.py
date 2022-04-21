@@ -8,8 +8,8 @@ from airflow import models as m, DAG
 from airflow.operators.bash import BashOperator
 from faldbt.project import DbtModel
 
-from dags.dbt_airflow.package_wrapper import PackageWrapper
-from dags.utils import new_same_window_external_sensor
+from utils import new_same_window_external_sensor
+from dbt_airflow.package_wrapper import PackageWrapper
 
 V = TypeVar('V', bound=BashOperator)
 

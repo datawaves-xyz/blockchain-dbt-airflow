@@ -3,7 +3,7 @@ from typing import Optional, TypeVar
 
 from dbt.adapters.spark.connections import SparkConnectionMethod
 
-from dags.variables import read_vars, parse_int
+from variables import read_vars, parse_int
 
 C = TypeVar('C', bound='Credential')
 
