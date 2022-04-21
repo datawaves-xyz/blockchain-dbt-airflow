@@ -6,10 +6,10 @@ from typing import Optional, Dict, TypeVar
 
 from airflow import models as m, DAG
 from airflow.operators.bash import BashOperator
-from faldbt.project import DbtModel
+from fal import DbtModel
 
-from utils import new_same_window_external_sensor
 from dbt_airflow.package_wrapper import PackageWrapper
+from utils import new_same_window_external_sensor
 
 V = TypeVar('V', bound=BashOperator)
 
