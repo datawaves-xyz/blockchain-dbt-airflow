@@ -7,6 +7,7 @@ from typing import List, Dict
 from fal import FalDbt, DbtModel
 from faldbt.project import DbtTest
 
+from dbt_airflow.dbt_cli import DbtCli
 from dbt_airflow.git_cli import GitCli
 from dbt_airflow.profile import Profile
 
@@ -38,6 +39,8 @@ class PackageWrapper:
         profile = Profile()
         profile.dump_yml_file(profile_dir=profiles_dir)
 
+        # Install all dbt dependency and new package instance
+        DbtCli.deps(dir=project_dir, profiles_dir=profiles_dir)
         self._package = FalDbt(project_dir=project_dir, profiles_dir=profiles_dir)
 
     @functools.cached_property
@@ -76,9 +79,9 @@ class PackageWrapper:
             if tag.startswith('chain_'):
                 chain = tag[len('chain_'):]
             elif tag.startswith('proj_'):
-                proj = tag[len('proj_')]
+                proj = tag[len('proj_'):]
             elif tag.startswith('level_'):
-                level = tag[len('level_')]
+                level = tag[len('level_'):]
 
         if chain is None or proj is None or level is None:
             raise ValueError(f'{",".join(tags)} is not a valid tags.')

@@ -74,5 +74,7 @@ class GitCli:
             raise AirflowException("git command failed")
 
     @staticmethod
-    def clone(repo_url: str, dir: str, tag: str, **kwargs):
+    def clone(
+            repo_url: str, dir: str, tag: str, **kwargs
+    ) -> None:
         GitCli(repo_url=repo_url, dir=dir, tag=tag, **kwargs).run_cli('clone')
