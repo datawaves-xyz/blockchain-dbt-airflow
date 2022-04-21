@@ -1,10 +1,11 @@
 import json
+import logging
 import os.path
 import pathlib
 from datetime import timedelta
 from typing import Optional, Dict, TypeVar
 
-from airflow import models as m, DAG
+from airflow import DAG
 from airflow.operators.bash import BashOperator
 from fal import DbtModel
 
@@ -27,9 +28,10 @@ class DbtDagsBuilder:
      这三者的任意组合会对应一个DAG。由于层级之间的依赖是单向的，所以调度时间会绑定 level tag，跨层级的依赖会通过构建 sensor 实现。
     """
 
-    _task_map: Dict[str, V]
-    _default_dag_args: Dict[str, any]
-    _schedule_interval_map: Dict[str, str]
+    task_map: Dict[str, V]
+    default_dag_args: Dict[str, any]
+    schedule_interval_map: Dict[str, str]
+    logger: logging.Logger
 
     def __init__(
             self,
@@ -39,15 +41,17 @@ class DbtDagsBuilder:
             modeling_schedule_interval: str = '0 3 * * *',
             notification_emails: Optional[str] = None
     ) -> None:
-        self._task_map = {}
+        self.task_map = {}
 
-        self._schedule_interval_map = {
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        self.schedule_interval_map = {
             'standardize': standardize_schedule_interval,
             'parse': parse_schedule_interval,
             'modeling': modeling_schedule_interval
         }
 
-        self._default_dag_args = {
+        self.default_dag_args = {
             'depends_on_past': False,
             'start_date': start_date,
             'email_on_failure': True,
@@ -57,7 +61,7 @@ class DbtDagsBuilder:
         }
 
         if notification_emails and len(notification_emails) > 0:
-            self._default_dag_args['email'] = [email.strip() for email in notification_emails.split(',')]
+            self.default_dag_args['email'] = [email.strip() for email in notification_emails.split(',')]
 
     def build_dbt_dags(
             self, repo_url: str, repo_tag: str, workspace: str, profiles_dir: str,
@@ -77,15 +81,19 @@ class DbtDagsBuilder:
 
         model_maps = package.model_grouping_by_tag
 
+        self.logger.debug('Load all models from the result of dbt compiling: ')
+        for tag, models in model_maps.items():
+            self.logger.debug(f'  {tag}: {len(models)}')
+
         # Build all DAGs and all tasks in every DAG
         for tag, models in model_maps.items():
             level = PackageWrapper.get_level(tag)
 
-            dag = m.DAG(
+            dag = DAG(
                 dag_id=tag,
                 catchup=False,
-                schedule_interval=self._schedule_interval_map[level],
-                default_args=self._default_dag_args
+                schedule_interval=self.schedule_interval_map[level],
+                default_args=self.default_dag_args
             )
 
             globals()[tag] = dag
@@ -98,7 +106,7 @@ class DbtDagsBuilder:
             for model in models:
                 unique_id = model.node.unique_id
                 depends = model.node.depends_on_nodes
-                task = self._task_map[unique_id]
+                task = self.task_map[unique_id]
 
                 for depend in depends:
                     depend_type = depend.split('.')[0]
@@ -107,17 +115,17 @@ class DbtDagsBuilder:
                     if depend_type != 'models':
                         continue
 
-                    depend_task = self._task_map[depend]
+                    depend_task = self.task_map[depend]
                     if depend_task.dag_id == task.dag_id:
                         depend_task >> task
                     else:
                         # sensor_id 需要加上 task.dag_id 前缀是因为可能多个 DAG 中都需要加入 wait 同一个任务的sensor，
                         # 这时候它们其实是所属不同 DAG 的不同 sensor 实例
                         sensor_id = f'{task.dag_id}_{depend_task.dag_id}_{depend_task.task_id}'
-                        sensor_task = self._task_map[sensor_id]
+                        sensor_task = self.task_map[sensor_id]
                         if sensor_task is None:
                             sensor_task = new_same_window_external_sensor(dag=task.dag, depend_task=depend_task)
-                            self._task_map[sensor_id] = sensor_task
+                            self.task_map[sensor_id] = sensor_task
                         sensor_task >> task
 
     def _make_dbt_run_task(
@@ -135,5 +143,5 @@ class DbtDagsBuilder:
             dag=dag
         )
 
-        self._task_map[unique_id] = operator
+        self.task_map[unique_id] = operator
         return operator

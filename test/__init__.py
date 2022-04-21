@@ -1,3 +1,5 @@
+import dataclasses
+import json
 import os
 from typing import AnyStr
 
@@ -17,3 +19,10 @@ def read_resource(groups: [str], file_name: str) -> AnyStr:
 
     with open(fixture_file_name, encoding="utf-8") as file_handle:
         return file_handle.read()
+
+
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)

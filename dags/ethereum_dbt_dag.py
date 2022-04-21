@@ -1,5 +1,10 @@
+import logging
+
 from dbt_airflow.build_dbt_dag import DbtDagsBuilder
 from variables import read_vars
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
 
 builder = DbtDagsBuilder(
     start_date='2022-06-13',

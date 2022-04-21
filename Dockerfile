@@ -48,7 +48,6 @@ RUN python -m pip install --upgrade pip setuptools wheel --no-cache-dir
 
 USER airflow
 
-ENV PYTHONPATH=/opt/airflow/dags/repo/dags
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
