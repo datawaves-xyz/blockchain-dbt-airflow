@@ -1,3 +1,4 @@
+import json
 import os.path
 import pathlib
 from datetime import timedelta
@@ -73,7 +74,7 @@ class DbtDagsBuilder:
             workspace=workspace,
             profiles_dir=profiles_dir
         )
-        
+
         model_maps = package.model_grouping_by_tag
 
         # Build all DAGs and all tasks in every DAG
@@ -87,8 +88,10 @@ class DbtDagsBuilder:
                 default_args=self._default_dag_args
             )
 
+            globals()[tag] = dag
+
             for model in models:
-                self._make_dbt_run_task(model=model, dag=dag)
+                self._make_dbt_run_task(model=model, dag=dag, variables={'dt': '{{ds}}'})
 
         # Build all dependency relationship
         for models in model_maps.values():
@@ -118,7 +121,7 @@ class DbtDagsBuilder:
                         sensor_task >> task
 
     def _make_dbt_run_task(
-            self, model: DbtModel, dag: DAG
+            self, model: DbtModel, dag: DAG, variables: Dict[str, any] = {}
     ) -> BashOperator:
         dbt_dir = model.node.root_path
         unique_id = model.node.unique_id
@@ -127,7 +130,7 @@ class DbtDagsBuilder:
 
         operator = BashOperator(
             task_id=model_name,
-            bash_command=f'dbt --no-write-json run --select {model_path}',
+            bash_command=f'dbt --no-write-json --vars {json.dumps(variables)} run --select {model_path}',
             cwd=dbt_dir,
             dag=dag
         )
