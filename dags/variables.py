@@ -11,7 +11,9 @@ def read_vars(
         **kwargs: Dict[str, any]
 ) -> str:
     full_var_name = var_name if var_prefix is None else f'{var_prefix}{var_name}'
-    var: Optional[str] = Variable.get(full_var_name, None)
+    var = Variable.get(full_var_name, '')
+    if var == '':
+        var = None
     if var is None:
         var = default
     if var is None:

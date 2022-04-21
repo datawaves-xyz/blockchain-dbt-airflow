@@ -8,6 +8,7 @@ builder = DbtDagsBuilder(
 
 builder.build_dbt_dags(
     repo_url=read_vars('repo_url', var_prefix='dbt_', required=True),
+    repo_tag=read_vars('repo_tag', var_prefix='dbt_', default='master'),
     workspace='/tmp/dbt',
     profiles_dir='/tmp/profiles'
 )

@@ -7,7 +7,7 @@ from typing import List, Dict
 from faldbt.project import FalDbt, DbtModel, DbtTest
 
 from dags.dbt_airflow.git_cli import GitCli
-from dags.dbt_airflow.profile_wrapper import ProfileWrapper
+from dags.dbt_airflow.profile import Profile
 
 
 class PackageWrapper:
@@ -16,6 +16,7 @@ class PackageWrapper:
     def __init__(
             self,
             repo_url: str,
+            repo_tag: str = 'master',
             workspace: str = '/tmp/dbt',
             profiles_dir: str = '/tmp/profiles'
     ) -> None:
@@ -25,7 +26,7 @@ class PackageWrapper:
         if os.path.exists(project_dir):
             shutil.rmtree(project_dir)
 
-        GitCli.clone(repo_url=repo_url, dir=workspace)
+        GitCli.clone(repo_url=repo_url, dir=workspace, tag=repo_tag)
 
         # Generate the profiles.yml file
         # we need to write file because of there is not the constructor method with Profile parameter in the FalDbt.
@@ -33,8 +34,8 @@ class PackageWrapper:
             shutil.rmtree(profiles_dir)
 
         pathlib.Path(profiles_dir).mkdir(parents=True)
-        profile = ProfileWrapper()
-        profile.to_yml_file(profile_dir=profiles_dir)
+        profile = Profile()
+        profile.dump_yml_file(profile_dir=profiles_dir)
 
         self._package = FalDbt(project_dir=project_dir, profiles_dir=profiles_dir)
 

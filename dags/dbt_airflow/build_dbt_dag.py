@@ -59,7 +59,7 @@ class DbtDagsBuilder:
             self._default_dag_args['email'] = [email.strip() for email in notification_emails.split(',')]
 
     def build_dbt_dags(
-            self, repo_url: str, workspace: str, profiles_dir: str,
+            self, repo_url: str, repo_tag: str, workspace: str, profiles_dir: str,
     ) -> None:
         if not os.path.exists(workspace):
             pathlib.Path(workspace).mkdir(parents=True)
@@ -67,7 +67,13 @@ class DbtDagsBuilder:
         if not os.path.exists(profiles_dir):
             pathlib.Path(profiles_dir).mkdir(parents=True)
 
-        package = PackageWrapper(repo_url=repo_url, workspace=workspace, profiles_dir=profiles_dir)
+        package = PackageWrapper(
+            repo_url=repo_url,
+            repo_tag=repo_tag,
+            workspace=workspace,
+            profiles_dir=profiles_dir
+        )
+        
         model_maps = package.model_grouping_by_tag
 
         # Build all DAGs and all tasks in every DAG
