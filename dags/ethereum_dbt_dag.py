@@ -7,13 +7,9 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 
 builder = DbtDagsBuilder(
-    start_date='2022-06-13',
+    start_date='2022-04-20',
     notification_emails=read_vars('notification_emails')
 )
 
-builder.build_dbt_dags(
-    repo_url=read_vars('repo_url', var_prefix='dbt_', required=True),
-    repo_tag=read_vars('repo_tag', var_prefix='dbt_', default='master'),
-    workspace='/tmp/dbt',
-    profiles_dir='/tmp/profiles'
-)
+for dag_id, dag in builder.build_dbt_dags().items():
+    globals()[dag_id] = dag
