@@ -5,7 +5,7 @@
         partition_by=['dt'],
         file_format='parquet',
         pre_hook={
-            'sql': 'create or replace function opensea_wyvernexchangev1_calculatecurrentprice__calldecodeudf as "io.iftech.sparkudf.hive.opensea_WyvernExchangeV1_calculateCurrentPrice__CallDecodeUDF" using jar "s3a://ifcrypto/blockchain-dbt/jars/opensea_udf.jar";'
+            'sql': 'create or replace function opensea_wyvernexchangev1_calculatecurrentprice__calldecodeudf as "io.iftech.sparkudf.hive.Opensea_WyvernExchangeV1_calculateCurrentPrice__CallDecodeUDF" using jar "s3a://blockchain-dbt/dist/jars/blockchain-dbt-udf.jar";'
         }
     )
 }}

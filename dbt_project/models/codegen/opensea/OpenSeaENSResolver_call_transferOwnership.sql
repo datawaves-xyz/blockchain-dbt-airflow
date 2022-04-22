@@ -5,7 +5,7 @@
         partition_by=['dt'],
         file_format='parquet',
         pre_hook={
-            'sql': 'create or replace function opensea_openseaensresolver_transferownership_calldecodeudf as "io.iftech.sparkudf.hive.opensea_OpenSeaENSResolver_transferOwnership_CallDecodeUDF" using jar "s3a://ifcrypto/blockchain-dbt/jars/opensea_udf.jar";'
+            'sql': 'create or replace function opensea_openseaensresolver_transferownership_calldecodeudf as "io.iftech.sparkudf.hive.Opensea_OpenSeaENSResolver_transferOwnership_CallDecodeUDF" using jar "s3a://blockchain-dbt/dist/jars/blockchain-dbt-udf.jar";'
         }
     )
 }}
