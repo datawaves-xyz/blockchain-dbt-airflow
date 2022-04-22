@@ -71,7 +71,7 @@ def exec_command(
     sp = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.PIPE,
         cwd=cwd,
         close_fds=True
     )
@@ -89,4 +89,6 @@ def exec_command(
     )
 
     if sp.returncode:
-        raise AirflowException(f"exec command failed: {cmd}")
+        err_msg = ','.join([line.decode('utf-8').rstrip()
+                            for line in iter(sp.stderr.readline, b'')])
+        raise AirflowException(f"exec command failed, cmd: {cmd}, err_msg: {err_msg}")

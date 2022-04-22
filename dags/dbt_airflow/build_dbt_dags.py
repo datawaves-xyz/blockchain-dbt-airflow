@@ -1,4 +1,6 @@
 import json
+import os
+import pathlib
 from datetime import timedelta
 from typing import Optional, TypeVar, Dict
 
@@ -13,12 +15,18 @@ from utils import new_same_window_external_sensor
 Operator = TypeVar('Operator', bound=BaseOperator)
 
 
+def _get_dbt_project_path() -> str:
+    folder = os.path.dirname(__file__)
+    root_folder = pathlib.Path(folder).parent.parent
+    return os.path.join(root_folder, 'dbt_project')
+
+
 def _get_level(tag: str) -> str:
     return tag.split('_')[1]
 
 
 def _make_dbt_run_task(
-        project: DbtProject,
+        project: str,
         model: DbtModel,
         dag: DAG,
         variables: Dict[str, any],
@@ -30,7 +38,7 @@ def _make_dbt_run_task(
     operator = BashOperator(
         task_id=model_name,
         bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir . run --vars '{json.dumps(variables)}' --select {model_full_name}",
-        cwd=project.project_path,
+        cwd=project,
         env=env,
         dag=dag
     )
@@ -40,10 +48,10 @@ def _make_dbt_run_task(
 
 def build_dbt_dags(
         start_date: str,
-        manifest_url: str,
-        workspace: str,
-        repo_url: str,
-        repo_branch: str,
+        # manifest_url: str,
+        # workspace: str,
+        # repo_url: str,
+        # repo_branch: str,
         dbt_env: Optional[Dict[str, any]] = None,
         standardize_schedule_interval: str = '0 1 * * *',
         parse_schedule_interval: str = '0 2 * * *',
@@ -71,8 +79,8 @@ def build_dbt_dags(
     task_map: Dict[str, Operator] = {}
     dag_map: Dict[str, DAG] = {}
 
-    project = DbtProject(workspace, repo_url, repo_branch)
-    manifest = DbtManifest.from_url(manifest_url)
+    project = DbtProject(_get_dbt_project_path())
+    manifest = DbtManifest.from_file(os.path.join(project.project_path, 'manifest.json'))
 
     # Build all DAGs and all tasks in every DAG
     for tag, models in manifest.model_grouping_by_tag.items():
@@ -88,7 +96,8 @@ def build_dbt_dags(
         dag_map[tag] = dag
 
         for model in models:
-            task = _make_dbt_run_task(project=project, model=model, dag=dag, env=dbt_env, variables={'dt': '{{ ds }}'})
+            task = _make_dbt_run_task(project=project.project_path, model=model, dag=dag, env=dbt_env,
+                                      variables={'dt': '{{ ds }}'})
             task_map[model.node.unique_id] = task
 
     # Build all dependency relationship
