@@ -40,7 +40,7 @@ def build_dbt_dags(
         parse_schedule_interval: str = '0 2 * * *',
         modeling_schedule_interval: str = '0 3 * * *',
         notification_emails: Optional[str] = None
-) -> None:
+) -> Dict[str, DAG]:
     schedule_interval_map = {
         'standardize': standardize_schedule_interval,
         'parse': parse_schedule_interval,
@@ -60,6 +60,7 @@ def build_dbt_dags(
         default_dag_args['email'] = [email.strip() for email in notification_emails.split(',')]
 
     task_map: Dict[str, Operator] = {}
+    dag_map: Dict[str, DAG] = {}
     manifest = DbtManifest.from_url(manifest_url)
 
     # Build all DAGs and all tasks in every DAG
@@ -73,10 +74,10 @@ def build_dbt_dags(
             default_args=default_dag_args
         )
 
-        globals()[tag] = dag
+        dag_map[tag] = dag
 
         for model in models:
-            task = _make_dbt_run_task(model=model, dag=dag, variables={'dt': '{{ds}}'})
+            task = _make_dbt_run_task(model=model, dag=dag, variables={'dt': '{{ ds }}'})
             task_map[model.node.unique_id] = task
 
     # Build all dependency relationship
@@ -106,3 +107,5 @@ def build_dbt_dags(
                     else:
                         sensor_task = task_map[sensor_id]
                     sensor_task >> task
+
+    return dag_map
