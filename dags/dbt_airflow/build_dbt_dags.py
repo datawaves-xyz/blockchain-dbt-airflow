@@ -7,6 +7,7 @@ from airflow.models import BaseOperator
 from airflow.operators.bash import BashOperator
 
 from dbt_airflow.dbt_resource import DbtManifest, DbtModel
+from dbt_airflow.project import DbtProject
 from utils import new_same_window_external_sensor
 
 Operator = TypeVar('Operator', bound=BaseOperator)
@@ -17,16 +18,22 @@ def _get_level(tag: str) -> str:
 
 
 def _make_dbt_run_task(
-        model: DbtModel, dag: DAG, variables: Dict[str, any] = {}
+        project: DbtProject,
+        model: DbtModel,
+        dag: DAG,
+        variables: Dict[str, any],
+        env: Optional[Dict[str, any]] = None,
 ) -> BashOperator:
-    dbt_dir = model.node.root_path
     model_path = model.node.path
     model_name = model.name.split('.')[-1]
 
     operator = BashOperator(
         task_id=model_name,
-        bash_command=f"dbt --no-write-json --vars '{json.dumps(variables)}' run --select {model_path}",
-        cwd=dbt_dir,
+        bash_command=f"""
+            dbt --vars '{json.dumps(variables)}' --profiles . run --select {model_path}
+        """,
+        cwd=project.project_path,
+        env=env,
         dag=dag
     )
 
@@ -36,6 +43,10 @@ def _make_dbt_run_task(
 def build_dbt_dags(
         start_date: str,
         manifest_url: str,
+        workspace: str,
+        repo_url: str,
+        repo_branch: str,
+        dbt_env: Optional[Dict[str, any]] = None,
         standardize_schedule_interval: str = '0 1 * * *',
         parse_schedule_interval: str = '0 2 * * *',
         modeling_schedule_interval: str = '0 3 * * *',
@@ -61,6 +72,8 @@ def build_dbt_dags(
 
     task_map: Dict[str, Operator] = {}
     dag_map: Dict[str, DAG] = {}
+
+    project = DbtProject(workspace, repo_url, repo_branch)
     manifest = DbtManifest.from_url(manifest_url)
 
     # Build all DAGs and all tasks in every DAG
@@ -77,7 +90,7 @@ def build_dbt_dags(
         dag_map[tag] = dag
 
         for model in models:
-            task = _make_dbt_run_task(model=model, dag=dag, variables={'dt': '{{ ds }}'})
+            task = _make_dbt_run_task(project=project, model=model, dag=dag, env=dbt_env, variables={'dt': '{{ ds }}'})
             task_map[model.node.unique_id] = task
 
     # Build all dependency relationship

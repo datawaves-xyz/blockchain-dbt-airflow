@@ -1,4 +1,6 @@
+import subprocess
 from datetime import datetime, timedelta
+from logging import Logger
 
 import pendulum as pdl
 from airflow import AirflowException
@@ -60,3 +62,30 @@ def new_same_window_external_sensor(
         check_existence=True,
         execution_date_fn=execute_date_fn
     )
+
+
+def exec_command(
+        cmd: str, cwd: str, logger: Logger
+) -> None:
+    sp = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        cwd=cwd,
+        close_fds=True
+    )
+
+    logger.info(f"exec command {cmd} in the {cwd}")
+    logger.info("output:")
+    for line in iter(sp.stdout.readline, b''):
+        line = line.decode('uft-8').rstrip()
+        logger.info(line)
+    sp.wait()
+
+    logger.info(
+        "command exited with return code %s",
+        sp.returncode
+    )
+
+    if sp.returncode:
+        raise AirflowException(f"exec command failed: {cmd}")

@@ -1,3 +1,4 @@
+import json
 from typing import Optional, Dict
 
 from airflow.models import Variable
@@ -40,3 +41,11 @@ def parse_int(
     if val is None:
         return None
     return int(val)
+
+
+def parse_dict(
+        val: Optional[str]
+) -> Optional[Dict[any, any]]:
+    if val is None:
+        return None
+    return json.loads(val)
