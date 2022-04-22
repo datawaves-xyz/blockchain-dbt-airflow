@@ -1,4 +1,3 @@
 pydantic==1.9.0
-fal==0.2.12
 dbt-core==1.0.4
 pyaml==21.10.1

@@ -1,15 +1,8 @@
-import logging
-
-from dbt_airflow.build_dbt_dag import DbtDagsBuilder
+from dbt_airflow.build_dbt_dags import build_dbt_dags
 from variables import read_vars
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
-
-builder = DbtDagsBuilder(
+build_dbt_dags(
     start_date='2022-04-20',
+    manifest_url=read_vars('manifest', var_prefix='dbt_', required=True),
     notification_emails=read_vars('notification_emails')
 )
-
-for dag_id, dag in builder.build_dbt_dags().items():
-    globals()[dag_id] = dag
