@@ -1,6 +1,7 @@
 import subprocess
 from datetime import datetime, timedelta
 from logging import Logger
+from typing import List
 
 import pendulum as pdl
 from airflow import AirflowException
@@ -65,7 +66,7 @@ def new_same_window_external_sensor(
 
 
 def exec_command(
-        cmd: str, cwd: str, logger: Logger
+        cmd: List[str], cwd: str, logger: Logger
 ) -> None:
     sp = subprocess.Popen(
         cmd,
@@ -78,7 +79,7 @@ def exec_command(
     logger.info(f"exec command {cmd} in the {cwd}")
     logger.info("output:")
     for line in iter(sp.stdout.readline, b''):
-        line = line.decode('uft-8').rstrip()
+        line = line.decode('utf-8').rstrip()
         logger.info(line)
     sp.wait()
 

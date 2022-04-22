@@ -1,5 +1,6 @@
 import logging
 import os.path
+import shutil
 
 from utils import exec_command
 
@@ -14,9 +15,17 @@ class DbtProject:
         self.project_name = self.get_name_from_git_url(repo_url)
         self.project_path = os.path.join(self.workspace, self.project_name)
 
+        if os.path.exists(self.project_path):
+            shutil.rmtree(self.project_path)
+
         exec_command(
-            cmd=f'git clone --branch {repo_branch} {repo_url}',
-            cwd=workspace, logger=self.logger
+            cmd=['git', 'clone', '--branch', repo_branch, repo_url],
+            cwd=self.workspace, logger=self.logger
+        )
+
+        exec_command(
+            cmd=['dbt', '--profiles-dir', '.', 'deps'],
+            cwd=self.project_path, logger=self.logger
         )
 
     @staticmethod

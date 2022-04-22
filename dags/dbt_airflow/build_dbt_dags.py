@@ -24,14 +24,12 @@ def _make_dbt_run_task(
         variables: Dict[str, any],
         env: Optional[Dict[str, any]] = None,
 ) -> BashOperator:
-    model_path = model.node.path
+    model_full_name = '.'.join(model.node.fqn)
     model_name = model.name.split('.')[-1]
 
     operator = BashOperator(
         task_id=model_name,
-        bash_command=f"""
-            dbt --vars '{json.dumps(variables)}' --profiles . run --select {model_path}
-        """,
+        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir . run --vars '{json.dumps(variables)}' --select {model_full_name}",
         cwd=project.project_path,
         env=env,
         dag=dag
