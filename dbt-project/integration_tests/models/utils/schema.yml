@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: test_hex
+    tests:
+      - assert_equal:
+          actual: actual
+          expected: expected
+
+  - name: test_displayed_amount
+    tests:
+      - assert_equal:
+          actual: actual
+          expected: expected
+
+  - name: test_substring
+    tests:
+      - assert_equal:
+          actual: actual
+          expected: expected

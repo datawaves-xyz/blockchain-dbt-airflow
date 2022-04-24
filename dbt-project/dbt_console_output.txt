@@ -1,0 +1,80 @@
+13:22:10  Running with dbt=1.0.0
+13:22:10  Partial parse save file not found. Starting full parse.
+13:22:15  Found 285 models, 0 tests, 0 snapshots, 0 analyses, 443 macros, 0 operations, 1 seed file, 8 sources, 0 exposures, 0 metrics
+13:22:15  
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+failed to resolve sockaddr for spark-thrift-server.tellery-prod.svc.cluster.local:10001
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 123, in open
+    addrs = self._resolveAddr()
+  File "/usr/local/lib/python3.9/site-packages/thrift/transport/TSocket.py", line 37, in _resolveAddr
+    return socket.getaddrinfo(self.host,
+  File "/usr/local/lib/python3.9/socket.py", line 954, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -2] Name or service not known
+13:22:15  Concurrency: 16 threads (target='prod')
+13:22:15  
+13:22:18  Done.
+DBT run OK
