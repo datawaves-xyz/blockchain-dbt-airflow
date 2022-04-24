@@ -1,0 +1,15 @@
+config-version: 2
+
+name: 'ethereum_integration_tests'
+version: '1.0'
+profile: 'integration_tests'
+
+seeds:
+  
+  ethereum_integration_tests:
+    utils:
+      data_displayed_amount:
+      data_hex:
+      data_substring:
+
+
