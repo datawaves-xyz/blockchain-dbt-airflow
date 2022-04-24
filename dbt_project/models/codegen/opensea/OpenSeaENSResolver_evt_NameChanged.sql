@@ -26,7 +26,7 @@ with base as (
     and selector_hash = abs(hash("0xb7d29e911041e8d9b843369e890bcb72c9388692ba48b65ac54e7214c4c348f7")) % 10
 
     {% if is_incremental() %}
-      and dt = var('dt')
+      and dt = '{{ var("dt") }}'
     {% endif %}
 ),
 

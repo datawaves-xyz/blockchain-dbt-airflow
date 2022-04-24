@@ -48,10 +48,6 @@ def _make_dbt_run_task(
 
 def build_dbt_dags(
         start_date: str,
-        # manifest_url: str,
-        # workspace: str,
-        # repo_url: str,
-        # repo_branch: str,
         dbt_env: Optional[Dict[str, any]] = None,
         standardize_schedule_interval: str = '0 1 * * *',
         parse_schedule_interval: str = '0 2 * * *',

@@ -13,5 +13,5 @@ and selector = "0x30783731353031386136"
 and selector_hash = abs(hash("0x30783731353031386136")) % 10
 
 {% if is_incremental() %}
-  and dt = var('dt')
+  and dt = '{{ var("dt") }}'
 {% endif %}
