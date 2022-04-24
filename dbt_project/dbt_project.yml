@@ -1,40 +1,32 @@
 config-version: 2
-name: ethereum_source
-profile: ethereum_source
-log-path: /tmp/dbt_logs
-target-path: /tmp/dbt_target
-packages-install-path: /tmp/dbt_packages
-version: 0.1.0
-require-dbt-version:
-  - '>=1.0.0'
-  - <2.0.0
+
+name: "ethereum"
+version: "1.0.0"
+profile: "dbt_ethereum"
+
 models:
-    ethereum_source:
-        stg:
-            +materialized: view
-            +schema: stg_ethereum
-            +tags:
-              - chain_ethereum
-              - level_standardize
-              - proj_global
-        codegen:
-            opensea:
-                +schema: opensea
-                +tags:
-                  - chain_ethereum
-                  - level_parse
-                  - proj_opensea
+  ethereum:
+    nft:
+      +schema: nft
+      +materialized: view
+
+seeds:
+  ethereum:
+    nft:
+      +schema: nft
+
 vars:
-    ethereum_source:
-        transactions: "{{ source('ethereum', 'transactions') }}"
-        token_transfers: "{{ source('ethereum', 'token_transfers') }}"
-        tokens: "{{ source('ethereum', 'tokens') }}"
-        contracts: "{{ source('ethereum', 'contracts') }}"
-        blocks: "{{ source('ethereum', 'blocks') }}"
-        logs: "{{ source('ethereum', 'logs') }}"
-        traces: "{{ source('ethereum', 'traces') }}"
-        receipts: "{{ source('ethereum', 'receipts') }}"
-        using_traces: true
-        using_logs: true
-        using_token_transfers: true
-        using_receipts: false
+  ethereum:
+    # ethereum-etl
+    transactions: "{{ ref('stg_ethereum__transactions') }}"
+    blocks: "{{ ref('stg_ethereum__blocks') }}"
+    logs: "{{ ref('stg_ethereum__logs') }}"
+    traces: "{{ ref('stg_ethereum__traces') }}"
+    token_transfers: "{{ ref('stg_ethereum__token_transfers' )}}"
+    contracts: "{{ ref('stg_ethereum__contracts') }}"
+    tokens: "{{ ref('stg_ethereum__tokens') }}"
+    receipts: "{{ ref('stg_ethereum__receipts') }}"
+
+  prices_usd: "prices.usd"
+  start_ts: "1970-01-01"
+  end_ts: "9999-01-01"
