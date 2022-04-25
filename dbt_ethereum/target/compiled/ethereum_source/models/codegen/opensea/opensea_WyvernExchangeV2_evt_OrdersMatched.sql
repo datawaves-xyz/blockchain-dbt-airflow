@@ -16,6 +16,8 @@ with base as (
     and selector_hash = abs(hash("0xc4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9")) % 10
 
     
+      and dt = 'not-set'
+    
 ),
 
 final as (

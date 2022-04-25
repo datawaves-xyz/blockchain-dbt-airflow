@@ -3,6 +3,9 @@ config-version: 2
 name: "ethereum"
 version: "1.0.0"
 profile: "dbt_ethereum"
+log-path: /tmp/dbt-log
+target-path: /tmp/dbt-target
+packages-install-path: /tmp/dbt-package
 
 models:
   ethereum:

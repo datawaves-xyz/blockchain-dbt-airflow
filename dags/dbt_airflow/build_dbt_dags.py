@@ -37,7 +37,7 @@ def _make_dbt_run_task(
 
     operator = BashOperator(
         task_id=model_name,
-        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir . run --vars '{json.dumps(variables)}' --select {model_full_name}",
+        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
         cwd=project, env=env, dag=dag
     )
 
