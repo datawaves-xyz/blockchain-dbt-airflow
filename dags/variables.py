@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from airflow.models import Variable
 
@@ -49,3 +49,11 @@ def parse_dict(
     if val is None:
         return None
     return json.loads(val)
+
+
+def parse_list(
+        val: Optional[str], sep: str,
+) -> Optional[List[str]]:
+    if val is None:
+        return None
+    return [item.strip() for item in val.split(sep)]
