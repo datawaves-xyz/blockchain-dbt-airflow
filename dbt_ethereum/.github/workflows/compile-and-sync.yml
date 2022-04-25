@@ -1,0 +1,43 @@
+# The dbt repository mapping a airflow repository to schedule all tasks,
+# any changes will be synced to the airflow repository.
+name: Compile-n-sync
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  SPARK_DATABASE: ${{ secrets.SPARK_DATABASE }}
+  SPARK_STS_HOST: ${{ secrets.SPARK_STS_HOST }}
+  SPARK_STS_PORT: ${{ secrets.SPARK_STS_PORT }}
+
+jobs:
+  compile-n-sync:
+    runs-on: datawaves-runner
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install deps
+        uses: mwhitaker/dbt-action@master
+        with:
+          dbt_command: "dbt deps --profiles-dir profile"
+
+      - name: Compile dbt
+        uses: mwhitaker/dbt-action@master
+        with:
+          dbt_command: "dbt compile --profiles-dir profile"
+
+      - name: Create pull request
+        uses: datawaves-xyz/action-pull-request-another-repo@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_folder: "."
+          destination_repo: "datawaves-xyz/blockchain-dbt-airflow"
+          destination_folder: "dbt_project"
+          destination_head_branch: "sync-from-dbt-ethereum"
+          destination_base_branch: "master"
+          user_email: ${{ secrets.GIT_USER_EMAIL }}
+          user_name: ${{ secrets.GIT_USER }}
