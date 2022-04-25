@@ -1,0 +1,32 @@
+[sqlfluff]
+dialect = sparksql
+templater = dbt
+exclude_rules = L011, L031
+
+[sqlfluff:templater:dbt]
+project_dir = ./
+
+[sqlfluff:rules]
+tab_space_size = 2
+max_line_length = 120
+comma_style = trailing
+
+[sqlfluff:rules:L010]
+# Keywords
+capitalisation_policy = lower
+
+[sqlfluff:rules:L014]
+# Unquoted identifier
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:L047]
+# Count(1)
+prefer_count_1 = True
+
+[sqlfluff:rules:L030]
+# Function names
+capitalisation_policy = lower
+
+[sqlfluff:rules:L040]
+# Null & Boolean Literals
+capitalisation_policy = lower
