@@ -5,7 +5,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 import requests
 from dbt.contracts.graph.manifest import Manifest
@@ -144,6 +144,9 @@ class DbtManifest:
         for model in self.models:
             merged_tag = self._merge_tags(model.node.tags)
 
+            if merged_tag is None:
+                continue
+
             if merged_tag not in grouping_by_tags:
                 grouping_by_tags[merged_tag] = []
 
@@ -162,7 +165,7 @@ class DbtManifest:
             return cls(Manifest.from_dict(json.loads(f.read())))
 
     @staticmethod
-    def _merge_tags(tags: List[str]) -> str:
+    def _merge_tags(tags: List[str]) -> Optional[str]:
         chain = None
         proj = None
         level = None
@@ -176,6 +179,6 @@ class DbtManifest:
                 level = tag[len('level_'):]
 
         if chain is None or proj is None or level is None:
-            raise ValueError(f'{",".join(tags)} is not a valid tags.')
+            return None
 
         return f'{chain}_{level}_{proj}'
