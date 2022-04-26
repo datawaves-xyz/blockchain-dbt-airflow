@@ -7,41 +7,14 @@ from typing import Optional, TypeVar, Dict
 from airflow import DAG
 from airflow.models import BaseOperator
 from airflow.operators.bash import BashOperator
+from airflow.sensors.bash import BashSensor
+from dbt.contracts.graph.parsed import ParsedSourceDefinition
 
 from dbt_airflow.dbt_resource import DbtModel
 from dbt_airflow.project import DbtWorkspace
 from utils import new_same_window_external_sensor
 
 Operator = TypeVar('Operator', bound=BaseOperator)
-
-
-def _get_dbt_project_path() -> str:
-    folder = os.path.dirname(__file__)
-    root_folder = pathlib.Path(folder).parent.parent
-    return os.path.join(root_folder, 'dbt_project')
-
-
-def _get_level(tag: str) -> str:
-    return tag.split('_')[1]
-
-
-def _make_dbt_run_task(
-        project: str,
-        model: DbtModel,
-        dag: DAG,
-        variables: Dict[str, any],
-        env: Optional[Dict[str, any]] = None,
-) -> BashOperator:
-    model_full_name = '.'.join(model.node.fqn)
-    model_name = model.name.split('.')[-1]
-
-    operator = BashOperator(
-        task_id=model_name,
-        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
-        cwd=project, env=env, dag=dag
-    )
-
-    return operator
 
 
 def build_dbt_dags(
@@ -75,7 +48,6 @@ def build_dbt_dags(
     workspace = DbtWorkspace()
 
     for project in workspace.projects:
-
         # Build all DAGs and all tasks in every DAG
         for tag, models in project.manifest.model_grouping_by_tag.items():
             level = _get_level(tag)
@@ -90,8 +62,8 @@ def build_dbt_dags(
             dag_map[tag] = dag
 
             for model in models:
-                task = _make_dbt_run_task(project=project.project_path, model=model, dag=dag, env=dbt_env,
-                                          variables={'dt': '{{ ds }}'})
+                task = _make_dbt_run_task(
+                    project=project.project_path, model=model, dag=dag, env=dbt_env, variables={'dt': '{{ ds }}'})
                 task_map[model.node.unique_id] = task
 
         # Build all dependency relationship
@@ -104,22 +76,81 @@ def build_dbt_dags(
                 for depend in depends:
                     depend_type = depend.split('.')[0]
 
-                    # TODO: 支持对 source depend 的解析，和 extract enrich 任务挂钩
-                    if depend_type != 'model':
-                        continue
+                    if depend_type == 'source':
+                        source = project.manifest.source_map[depend]
+                        if source.freshness is None:
+                            continue
 
-                    depend_task = task_map[depend]
-                    if depend_task.dag_id == task.dag_id:
-                        depend_task >> task
-                    else:
-                        # sensor_id 需要加上 task.dag_id 前缀是因为可能多个 DAG 中都需要加入 wait 同一个任务的sensor，
-                        # 这时候它们其实是所属不同 DAG 的不同 sensor 实例
-                        sensor_id = f'{task.dag_id}.{depend_task.dag_id}.{depend_task.task_id}'
-                        if sensor_id not in task_map:
-                            sensor_task = new_same_window_external_sensor(dag=task.dag, depend_task=depend_task)
-                            task_map[sensor_id] = sensor_task
+                        if source.unique_id not in task_map:
+                            source_sensor = _make_dbt_freshness_sensor(
+                                project=project.project_path, source=source, dag=task.dag, env=dbt_env)
+                            task_map[source.unique_id] = source_sensor
                         else:
-                            sensor_task = task_map[sensor_id]
-                        sensor_task >> task
+                            source_sensor = task_map[source.unique_id]
+                        source_sensor >> task
+
+                    elif depend_type == 'model':
+                        depend_task = task_map[depend]
+                        if depend_task.dag_id == task.dag_id:
+                            depend_task >> task
+                        else:
+                            # sensor_id 需要加上 task.dag_id 前缀是因为可能多个 DAG 中都需要加入 wait 同一个任务的sensor，
+                            # 这时候它们其实是所属不同 DAG 的不同 sensor 实例
+                            sensor_id = f'sensor_{task.dag_id}.{depend_task.dag_id}.{depend_task.task_id}'
+                            if sensor_id not in task_map:
+                                sensor_task = new_same_window_external_sensor(dag=task.dag, depend_task=depend_task)
+                                task_map[sensor_id] = sensor_task
+                            else:
+                                sensor_task = task_map[sensor_id]
+                            sensor_task >> task
+
+                    # TODO: support test
 
     return dag_map
+
+
+def _get_dbt_project_path() -> str:
+    folder = os.path.dirname(__file__)
+    root_folder = pathlib.Path(folder).parent.parent
+    return os.path.join(root_folder, 'dbt_project')
+
+
+def _get_level(tag: str) -> str:
+    return tag.split('_')[1]
+
+
+def _make_dbt_run_task(
+        project: str,
+        model: DbtModel,
+        dag: DAG,
+        variables: Dict[str, any],
+        env: Optional[Dict[str, any]] = None,
+) -> BashOperator:
+    model_full_name = '.'.join(model.node.fqn)
+    model_name = model.name.split('.')[-1]
+
+    operator = BashOperator(
+        task_id=model_name,
+        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
+        cwd=project, env=env, dag=dag
+    )
+
+    return operator
+
+
+def _make_dbt_freshness_sensor(
+        project: str,
+        source: ParsedSourceDefinition,
+        dag: DAG,
+        env: Optional[Dict[str, any]] = None
+) -> BashSensor:
+    source_full_name = '.'.join(source.fqn)
+    source_name = source.name
+
+    sensor = BashSensor(
+        task_id=f'freshness_check_{source_name}',
+        bash_command=f"cd {project} && /home/aiflow/.local/bin/dbt --profiles-dir profile source freshness --select {source_full_name}",
+        env=env, dag=dag
+    )
+
+    return sensor

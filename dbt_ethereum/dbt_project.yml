@@ -3,9 +3,6 @@ config-version: 2
 name: "ethereum"
 version: "1.0.0"
 profile: "dbt_ethereum"
-log-path: /tmp/dbt-log
-target-path: /tmp/dbt-target
-packages-install-path: /tmp/dbt-package
 
 models:
   ethereum:
@@ -37,3 +34,6 @@ vars:
   prices_usd: "prices.usd"
   start_ts: "1970-01-01"
   end_ts: "9999-01-01"
+log-path: /tmp/dbt-log
+target-path: /tmp/dbt-target
+packages-install-path: /tmp/dbt-package

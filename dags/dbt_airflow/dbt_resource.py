@@ -138,6 +138,14 @@ class DbtManifest:
         return list(self.nativeManifest.sources.values())
 
     @functools.cached_property
+    def source_map(self) -> Dict[str, ParsedSourceDefinition]:
+        return {i.unique_id: i for i in self.sources}
+
+    @functools.cached_property
+    def freshness_source(self) -> List[ParsedSourceDefinition]:
+        return [i for i in self.sources if i.freshness is not None]
+
+    @functools.cached_property
     def model_grouping_by_tag(self) -> Dict[str, List[DbtModel]]:
         grouping_by_tags: Dict[str, List[DbtModel]] = {}
 

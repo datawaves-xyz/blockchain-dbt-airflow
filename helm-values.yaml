@@ -48,4 +48,18 @@ dags:
 
 config:
   webserver:
-    work_class: gevent
+    expose_config: true
+  celery:
+    worker_concurrency: 32
+
+workers:
+  resources:
+    requests:
+      cpu: 1200m
+      memory: 1200Mi
+
+webserver:
+  resources:
+    requests:
+      cpu: 1200m
+      memory: 1200Mi

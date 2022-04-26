@@ -2,7 +2,7 @@ import logging
 import os.path
 import pathlib
 from logging import Logger
-from typing import Optional
+from typing import Optional, List
 
 from dbt_airflow.dbt_resource import DbtManifest
 from utils import exec_command
@@ -30,7 +30,7 @@ class DbtWorkspace:
     def __init__(
             self, root_folder: Optional[str] = None
     ) -> None:
-        self.projects = []
+        self.projects: List[DbtProject] = []
         self.logger = logging.getLogger(self.__class__.__name__)
 
         if root_folder is None:
