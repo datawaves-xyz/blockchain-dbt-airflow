@@ -7,6 +7,8 @@ from typing import Optional, List
 from dbt_airflow.dbt_resource import DbtManifest
 from utils import exec_command
 
+depend_path = '/tmp/dbt-package'
+
 
 class DbtProject:
 
@@ -15,10 +17,11 @@ class DbtProject:
     ) -> None:
         self.project_path = project_path
 
-        exec_command(
-            cmd=['dbt', '--profiles-dir', 'profile', 'deps'],
-            cwd=self.project_path, logger=logger
-        )
+        if not os.path.exists(depend_path):
+            exec_command(
+                cmd=['dbt', '--profiles-dir', 'profile', 'deps'],
+                cwd=self.project_path, logger=logger
+            )
 
     @property
     def manifest(self) -> DbtManifest:

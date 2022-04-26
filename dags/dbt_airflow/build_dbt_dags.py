@@ -7,11 +7,11 @@ from typing import Optional, TypeVar, Dict
 from airflow import DAG
 from airflow.models import BaseOperator
 from airflow.operators.bash import BashOperator
-from airflow.sensors.bash import BashSensor
 from dbt.contracts.graph.parsed import ParsedSourceDefinition
 
 from dbt_airflow.dbt_resource import DbtModel
 from dbt_airflow.project import DbtWorkspace
+from sensors.FixedBashSensor import FixedBashSensor
 from utils import new_same_window_external_sensor
 
 Operator = TypeVar('Operator', bound=BaseOperator)
@@ -143,14 +143,14 @@ def _make_dbt_freshness_sensor(
         source: ParsedSourceDefinition,
         dag: DAG,
         env: Optional[Dict[str, any]] = None
-) -> BashSensor:
+) -> FixedBashSensor:
     source_full_name = '.'.join(source.fqn)
     source_name = source.name
 
-    sensor = BashSensor(
+    sensor = FixedBashSensor(
         task_id=f'freshness_check_{source_name}',
-        bash_command=f"cd {project} && /home/aiflow/.local/bin/dbt --profiles-dir profile source freshness --select {source_full_name}",
-        env=env, dag=dag
+        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir profile source freshness --select source:{source_full_name}",
+        cwd=project, env=env, dag=dag
     )
 
     return sensor
