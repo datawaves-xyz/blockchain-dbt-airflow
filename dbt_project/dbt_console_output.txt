@@ -1,0 +1,8 @@
+07:52:22  Running with dbt=1.0.0
+07:52:22  Partial parse save file not found. Starting full parse.
+07:52:35  Found 550 models, 0 tests, 0 snapshots, 0 analyses, 443 macros, 0 operations, 1 seed file, 8 sources, 0 exposures, 0 metrics
+07:52:36  
+07:52:36  Concurrency: 4 threads (target='prod')
+07:52:36  
+07:52:45  Done.
+DBT run OK
