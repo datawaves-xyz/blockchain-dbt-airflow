@@ -14,7 +14,7 @@ env:
 
 jobs:
   compile-n-sync:
-    runs-on: datawaves-runner
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -30,10 +30,15 @@ jobs:
           dbt_command: "dbt compile --profiles-dir profile"
 
       - name: Polish dbt folder
-        runs: |
+        run: |
           cp target/manifest.json manifest.json
           rm -rf .git
-          echo "log-path: /tmp/dbt-log\ntarget-path: /tmp/dbt-target\npackages-install-path: /tmp/dbt-package" >> dbt_project.yml
+          sudo rm -rf target
+          sudo rm -rf logs
+          sudo rm -rf dbt_packages
+          echo """log-path: /tmp/dbt-log
+          target-path: /tmp/dbt-target
+          packages-install-path: /tmp/dbt-package""" >> dbt_project.yml
 
       - name: Create pull request
         uses: datawaves-xyz/action-pull-request-another-repo@main
@@ -42,7 +47,7 @@ jobs:
         with:
           source_folder: "."
           destination_repo: "datawaves-xyz/blockchain-dbt-airflow"
-          destination_folder: "dbt_project"
+          destination_folder: "dbt_ethereum"
           destination_head_branch: "sync-from-dbt-ethereum"
           destination_base_branch: "master"
           user_email: ${{ secrets.GIT_USER_EMAIL }}
