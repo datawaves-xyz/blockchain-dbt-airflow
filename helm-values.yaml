@@ -53,13 +53,8 @@ config:
     worker_concurrency: 32
 
 workers:
+  replicas: 4
   resources:
     requests:
-      cpu: 1200m
-      memory: 1200Mi
-
-webserver:
-  resources:
-    requests:
-      cpu: 1200m
-      memory: 1200Mi
+      cpu: 1000m
+      memory: 256Mi
