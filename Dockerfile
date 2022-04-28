@@ -13,7 +13,7 @@ ARG dbt_postgres_ref=dbt-core@v1.2.0a1
 ARG dbt_redshift_ref=dbt-redshift@v1.0.0
 ARG dbt_bigquery_ref=dbt-bigquery@v1.0.0
 ARG dbt_snowflake_ref=dbt-snowflake@v1.0.0
-ARG dbt_spark_ref=dbt-spark@v1.0.0
+ARG dbt_spark_ref=dbt-spark@1.1.0rc1
 # special case args
 ARG dbt_spark_version=all
 ARG dbt_third_party
@@ -99,4 +99,4 @@ RUN apt-get update \
     /var/tmp/*
 
 USER airflow
-RUN python -m pip install --no-cache-dir "git+https://github.com/dbt-labs/${dbt_spark_ref}#egg=dbt-spark[${dbt_spark_version}]"
+RUN python -m pip install --no-cache-dir "git+https://github.com/datawaves-xyz/dbt-spark.git@jerco/wip-faster-caching-option2#egg=dbt-spark[PyHive]"

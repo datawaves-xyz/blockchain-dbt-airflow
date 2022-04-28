@@ -131,7 +131,7 @@ def _make_dbt_run_task(
 
     operator = BashOperator(
         task_id=model_name,
-        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
+        bash_command=f"/home/airflow/.local/bin/dbt --debug --cache-selected-only --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
         cwd=project, env=env, dag=dag
     )
 
@@ -149,8 +149,7 @@ def _make_dbt_freshness_sensor(
 
     sensor = FixedBashSensor(
         task_id=f'freshness_check_{source_name}',
-        bash_command=f"/home/airflow/.local/bin/dbt --profiles-dir profile source freshness --select source:{source_full_name}",
-        mode='reschedule',
+        bash_command=f"/home/airflow/.local/bin/dbt --debug --cache-selected-only --profiles-dir profile source freshness --select source:{source_full_name}",
         cwd=project, env=env, dag=dag
     )
 

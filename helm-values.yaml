@@ -46,18 +46,29 @@ dags:
     # should be "" if dags are at repo root
     subPath: "/dags"
 
+    env:
+    - name: GIT_SYNC_PERMISSIONS
+      value: '0777'
+
 config:
   webserver:
     expose_config: true
   celery:
     worker_concurrency: 32
 
-executor: "KubernetesExecutor"
+#executor: "KubernetesExecutor"
 
-workers:
-  resources:
-    requests:
-     cpu: 200m
+#workers:
+#  resources:
+#    requests:
+#     cpu: 200m
+
+#workers:
+#  replicas: 4
+#  extraInitContainers:
+#   - name: volume-logs
+#     image: busybox
+#     command: ["sh", "-c", "chown -R 50000:50000 /opt/airflow/dags/"]
 
 logs:
   persistence:

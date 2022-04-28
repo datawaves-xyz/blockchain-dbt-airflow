@@ -5,8 +5,10 @@ from logging import Logger
 from typing import Optional, List
 
 from dbt_airflow.dbt_resource import DbtManifest
+from utils import exec_command
 
-depend_path = '/tmp/dbt-package'
+package_path = '/tmp/dbt-package'
+target_path = '/tmp/dbt-target'
 
 
 class DbtProject:
@@ -16,15 +18,32 @@ class DbtProject:
     ) -> None:
         self.project_path = project_path
 
-        # if not os.path.exists(depend_path):
-        #     exec_command(
-        #         cmd=['dbt', '--profiles-dir', 'profile', 'deps'],
-        #         cwd=self.project_path, logger=logger
-        #     )
+        if not os.path.exists(package_path):
+            exec_command(
+                cmd=['dbt', '--profiles-dir', 'profile', 'deps'],
+                cwd=self.project_path, logger=logger
+            )
+
+        # if os.path.exists(package_path):
+        #     shutil.rmtree(package_path)
+
+        # if os.path.exists(target_path):
+        #     shutil.rmtree(target_path)
+
+        # shutil.copytree(self.target_path, target_path)
+        # shutil.copytree(self.package_path, package_path)
 
     @property
     def manifest(self) -> DbtManifest:
-        return DbtManifest.from_file(os.path.join(self.project_path, 'target', 'manifest.json'))
+        return DbtManifest.from_file(os.path.join(self.project_path, 'manifest.json'))
+
+    @property
+    def target_path(self) -> str:
+        return os.path.join(self.project_path, 'target')
+
+    @property
+    def package_path(self) -> str:
+        return os.path.join(self.project_path, 'dbt_packages')
 
 
 class DbtWorkspace:
