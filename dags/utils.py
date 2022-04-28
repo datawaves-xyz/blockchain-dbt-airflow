@@ -61,7 +61,8 @@ def new_same_window_external_sensor(
         external_dag_id=depend_task.dag_id,
         external_task_id=depend_task.task_id,
         check_existence=True,
-        execution_date_fn=execute_date_fn
+        execution_date_fn=execute_date_fn,
+        mode='reschedule',
     )
 
 

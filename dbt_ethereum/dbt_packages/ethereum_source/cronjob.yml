@@ -1,0 +1,31 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: dbt-ethereum-source-cron-job
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: dbt-ethereum-source
+              image: { { your_image } }
+              env:
+                - name: SPARK_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: dbt_spark_sts
+                      key: database
+                - name: SPARK_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: dbt_spark_sts
+                      key: host
+                - name: SPARK_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: dbt_spark_sts
+                      key: port
+              imagePullPolicy: Always
+          restartPolicy: OnFailure
