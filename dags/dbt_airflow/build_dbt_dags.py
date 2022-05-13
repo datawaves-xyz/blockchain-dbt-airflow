@@ -78,7 +78,7 @@ def build_dbt_dags(
 
                     if depend_type == 'source':
                         source = project.manifest.source_map[depend]
-                        if source.freshness is None:
+                        if not source.freshness:
                             continue
 
                         if source.unique_id not in task_map:
