@@ -54,7 +54,7 @@ config:
   webserver:
     expose_config: true
   celery:
-    worker_concurrency: 32
+    worker_concurrency: 64
 
 #executor: "KubernetesExecutor"
 
