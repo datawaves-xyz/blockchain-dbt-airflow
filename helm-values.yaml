@@ -51,24 +51,18 @@ dags:
       value: '0777'
 
 config:
+  core:
+    parallelism: 128
   webserver:
     expose_config: true
   celery:
     worker_concurrency: 64
 
-#executor: "KubernetesExecutor"
-
-#workers:
-#  resources:
-#    requests:
-#     cpu: 200m
-
-#workers:
-#  replicas: 4
-#  extraInitContainers:
-#   - name: volume-logs
-#     image: busybox
-#     command: ["sh", "-c", "chown -R 50000:50000 /opt/airflow/dags/"]
+workers:
+  replicas: 2
+  extraInitContainers:
+   - name: volume-logs
+     image: busybox
 
 logs:
   persistence:
