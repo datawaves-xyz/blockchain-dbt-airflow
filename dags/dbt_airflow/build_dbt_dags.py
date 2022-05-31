@@ -1,9 +1,12 @@
 import json
+import logging
 import os
 import pathlib
+import re
 from datetime import timedelta
-from typing import Optional, TypeVar, Dict, List
+from typing import Optional, TypeVar, Dict
 
+import boto3
 from airflow import DAG
 from airflow.models import BaseOperator
 from dbt.contracts.graph.parsed import ParsedSourceDefinition
@@ -126,8 +129,42 @@ def _make_dbt_run_task(
         variables: Dict[str, any],
         env: Optional[Dict[str, any]] = None,
 ) -> FixedBashOperator:
-    def failed_hook(result: List[str]) -> None:
-        print(f'!!!!!!! result: {result}')
+    def failed_hook(results: str) -> None:
+        """When you attempt to rerun an Apache Spark write operation by cancelling the currently running job,
+        the following error occurs:
+
+        The associated location ('s3a://xxx') already exists.
+
+        you can set [spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation=true] to resolve it when the spark
+        version is 2.4 and below, but now can't do this. When a task fails check if it is because of it and if so simply
+        delete the relevant folder.
+
+        ref:
+        - https://kb.databricks.com/jobs/spark-overwrite-cancel.html
+        - https://stackoverflow.com/questions/55380427/azure-databricks-can-not-create-the-managed-table-the-associated-location-alre
+        """
+        regex = r"The associated location\('s3a://(.*?)'\) already exists."
+        exception_str = 'at org.apache.spark.sql.errors.QueryCompilationErrors$.cannotOperateManagedTableWithExistingLocationError'
+        s3_path = None
+
+        if exception_str in results:
+            matches = re.finditer(regex, results, re.MULTILINE)
+            for _, match in enumerate(matches, start=1):
+                s3_path = match.group(1)
+                break
+
+        if s3_path is None:
+            logging.info("can't find any s3 path, do nothing in failed hook.")
+
+        logging.info(f"s3_path: {s3_path}")
+        words = s3_path.split('/')
+        bucket = words[0]
+        folder_path = '/'.join(words[1:])
+        logging.info(f"delete s3 file, bucket: {bucket}, path_prefix: {folder_path}")
+
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(bucket)
+        bucket.objects.filter(Prefix=f'{folder_path}/').delete()
 
     model_full_name = '.'.join(model.node.fqn)
     model_name = model.name.split('.')[-1]

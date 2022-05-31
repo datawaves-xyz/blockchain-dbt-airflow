@@ -1,6 +1,6 @@
 import os
 from functools import cached_property
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from airflow import AirflowException
 from airflow.exceptions import AirflowSkipException
@@ -10,7 +10,7 @@ from hooks.fixed_subprocess import FixedSubprocessHook
 
 
 class FixedBashOperator(BashOperator):
-    def __init__(self, failed_hook: Optional[Callable[[List[str]], None]] = None, **kwargs):
+    def __init__(self, failed_hook: Optional[Callable[[str], None]] = None, **kwargs):
         super().__init__(**kwargs)
         self.failed_hook = failed_hook
 
