@@ -3,9 +3,10 @@ from functools import cached_property
 from typing import Optional, Dict
 
 from airflow import AirflowException
-from airflow.hooks.subprocess import SubprocessHook
 from airflow.sensors.base import BaseSensorOperator
 from airflow.utils.operator_helpers import context_to_airflow_vars
+
+from hooks.fixed_subprocess import FixedSubprocessHook
 
 
 class FixedBashSensor(BaseSensorOperator):
@@ -49,7 +50,7 @@ class FixedBashSensor(BaseSensorOperator):
     @cached_property
     def subprocess_hook(self):
         """Returns hook for running the bash command"""
-        return SubprocessHook()
+        return FixedSubprocessHook()
 
     def get_env(self, context):
         """Builds the set of environment variables to be exposed for the bash command"""

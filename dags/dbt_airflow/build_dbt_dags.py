@@ -2,16 +2,16 @@ import json
 import os
 import pathlib
 from datetime import timedelta
-from typing import Optional, TypeVar, Dict
+from typing import Optional, TypeVar, Dict, List
 
 from airflow import DAG
 from airflow.models import BaseOperator
-from airflow.operators.bash import BashOperator
 from dbt.contracts.graph.parsed import ParsedSourceDefinition
 
 from dbt_airflow.dbt_resource import DbtModel
 from dbt_airflow.project import DbtWorkspace
-from sensors.FixedBashSensor import FixedBashSensor
+from operators.fixed_bash_operator import FixedBashOperator
+from sensors.fixed_bash_sensor import FixedBashSensor
 from utils import new_same_window_external_sensor
 
 Operator = TypeVar('Operator', bound=BaseOperator)
@@ -125,19 +125,19 @@ def _make_dbt_run_task(
         dag: DAG,
         variables: Dict[str, any],
         env: Optional[Dict[str, any]] = None,
-) -> BashOperator:
-    def post_execute(context: Dict[str, any], result: any) -> None:
-        print(f'!!!!!!! context: {context}, result: {result}')
+) -> FixedBashOperator:
+    def failed_hook(result: List[str]) -> None:
+        print(f'!!!!!!! result: {result}')
 
     model_full_name = '.'.join(model.node.fqn)
     model_name = model.name.split('.')[-1]
 
-    operator = BashOperator(
+    operator = FixedBashOperator(
+        failed_hook=failed_hook,
         task_id=model_name,
         # https://stackoverflow.com/questions/63053009/how-can-we-check-the-output-of-bashoperator-in-airflow
-        bash_command=f"/home/airflow/.local/bin/dbt --debug --cache-selected-only --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name} | tee {model_full_name}.output && cat {model_full_name}.output | tr '\n' '||' && rm -rf {model_full_name}.output",
+        bash_command=f"/home/airflow/.local/bin/dbt --debug --cache-selected-only --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
         cwd=project, env=env, dag=dag,
-        post_execute=post_execute
     )
 
     return operator
