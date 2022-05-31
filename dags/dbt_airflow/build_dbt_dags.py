@@ -126,13 +126,18 @@ def _make_dbt_run_task(
         variables: Dict[str, any],
         env: Optional[Dict[str, any]] = None,
 ) -> BashOperator:
+    def post_execute(context: Dict[str, any], result: any) -> None:
+        print(f'!!!!!!! context: {context}, result: {result}')
+
     model_full_name = '.'.join(model.node.fqn)
     model_name = model.name.split('.')[-1]
 
     operator = BashOperator(
         task_id=model_name,
-        bash_command=f"/home/airflow/.local/bin/dbt --debug --cache-selected-only --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
-        cwd=project, env=env, dag=dag
+        # https://stackoverflow.com/questions/63053009/how-can-we-check-the-output-of-bashoperator-in-airflow
+        bash_command=f"/home/airflow/.local/bin/dbt --debug --cache-selected-only --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name} | tee {model_full_name}.output && cat {model_full_name}.output | tr '\n' '||' && rm -rf {model_full_name}.output",
+        cwd=project, env=env, dag=dag,
+        post_execute=post_execute
     )
 
     return operator
