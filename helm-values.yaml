@@ -9,6 +9,14 @@ images:
     repository: {{IMAGE_REPOSITORY}}
     tag: {{IMAGE_TAG}}
 
+env:
+  - name: AWS_ACCESS_KEY_ID
+    value: {{AWS_ACCESS_KEY_ID}}
+  - name: AWS_SECRET_ACCESS_KEY
+    value: {{AWS_SECRET_ACCESS_KEY}}
+  - name: AWS_DEFAULT_REGION
+    value: {{AWS_DEFAULT_REGION}}
+
 # Airflow database & redis config
 data:
   metadataSecretName: airflow-database
@@ -60,6 +68,11 @@ config:
 
 workers:
   replicas: 2
+
+  resources:
+    requests:
+      memory: 5G
+
   extraInitContainers:
    - name: volume-logs
      image: busybox

@@ -21,6 +21,21 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
+    --aws-access-key-id)
+      AWS_ACCESS_KEY_ID="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --aws-secret-access-key)
+      AWS_SECRET_ACCESS_KEY="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --aws-default-region)
+      AWS_DEFAULT_REGION="$2"
+      shift # past argument
+      shift # past value
+      ;;
     --image-name)
       IMAGE_NAME="$2"
       shift # past argument
@@ -43,7 +58,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Check all required arguments
-if [[ -z "$NAMESPACE" || -z "$PG_URL" || -z "$EKS_HOST" || -z "$IMAGE_NAME" || -z "$FERNET_KEY" ]];
+if [[ -z "$NAMESPACE" || -z "$PG_URL" || -z "$EKS_HOST" || -z "$IMAGE_NAME" || -z "$FERNET_KEY" || -z "$AWS_ACCESS_KEY_ID" || -z "$AWS_SECRET_ACCESS_KEY" || -z "$AWS_DEFAULT_REGION" ]];
 then
   echo "You missed some required argument."
   exit 1
@@ -76,7 +91,10 @@ mkdir -p -- "$TEMP_DIR"
 cat "$PROJECT_DIR"/helm-values.yaml | \
   sed "s={{IMAGE_REPOSITORY}}=$IMAGE_REPOSITORY=" | \
   sed "s={{IMAGE_TAG}}=$image_tag=" | \
-  sed "s/{{FERNET_KEY}}/$FERNET_KEY/" > "$HELM_VALUE_YAML"
+  sed "s/{{FERNET_KEY}}/$FERNET_KEY/" | \
+  sed "s={{AWS_ACCESS_KEY_ID}}=$AWS_ACCESS_KEY_ID=" | \
+  sed "s={{AWS_SECRET_ACCESS_KEY}}=$AWS_SECRET_ACCESS_KEY=" | \
+  sed "s={{AWS_DEFAULT_REGION}}=$AWS_DEFAULT_REGION=" > "$HELM_VALUE_YAML"
 
 # Recreate namespace and install all resources.
 kubectl delete namespace "$NAMESPACE"

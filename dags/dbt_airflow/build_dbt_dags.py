@@ -155,16 +155,16 @@ def _make_dbt_run_task(
 
         if s3_path is None:
             logging.info("can't find any s3 path, do nothing in failed hook.")
+            return
 
-        logging.info(f"s3_path: {s3_path}")
         words = s3_path.split('/')
         bucket = words[0]
         folder_path = '/'.join(words[1:])
-        logging.info(f"delete s3 file, bucket: {bucket}, path_prefix: {folder_path}")
 
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(bucket)
         bucket.objects.filter(Prefix=f'{folder_path}/').delete()
+        logging.info(f"delete s3 file, bucket: {bucket}, path_prefix: {folder_path}")
 
     model_full_name = '.'.join(model.node.fqn)
     model_name = model.name.split('.')[-1]
@@ -172,7 +172,6 @@ def _make_dbt_run_task(
     operator = FixedBashOperator(
         failed_hook=failed_hook,
         task_id=model_name,
-        # https://stackoverflow.com/questions/63053009/how-can-we-check-the-output-of-bashoperator-in-airflow
         bash_command=f"/home/airflow/.local/bin/dbt --debug --cache-selected-only --profiles-dir profile run --vars '{json.dumps(variables)}' --select {model_full_name}",
         cwd=project, env=env, dag=dag,
     )
