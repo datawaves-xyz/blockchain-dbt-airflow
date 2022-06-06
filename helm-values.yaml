@@ -67,11 +67,12 @@ config:
     worker_concurrency: 64
 
 workers:
-  replicas: 2
+  replicas: 4
 
   resources:
     requests:
-      memory: 5G
+      memory: 1G
+      limit: 4G
 
   extraInitContainers:
    - name: volume-logs
