@@ -60,19 +60,33 @@ dags:
 
 config:
   core:
-    parallelism: 128
+    parallelism: 120
   webserver:
     expose_config: true
   celery:
-    worker_concurrency: 64
+    worker_concurrency: 8
 
 workers:
-  replicas: 4
+  replicas: 1
 
   resources:
     requests:
-      memory: 1G
-      limit: 4G
+      memory: 3Gi
+    limits:
+      memory: 3Gi
+
+  keda:
+    enabled: true
+    namespaceLabels: {}
+    # How often KEDA polls the airflow DB to report new scale requests to the HPA
+    pollingInterval: 5
+    # How many seconds KEDA will wait before scaling to zero.
+    # Note that HPA has a separate cooldown period for scale-downs
+    cooldownPeriod: 30
+    # Minimum number of workers created by keda
+    minReplicaCount: 0
+    # Maximum number of workers created by keda
+    maxReplicaCount: 15
 
   extraInitContainers:
    - name: volume-logs
