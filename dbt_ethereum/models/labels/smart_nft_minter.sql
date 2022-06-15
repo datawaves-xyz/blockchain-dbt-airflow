@@ -19,7 +19,7 @@ mint_stat as (
   from mint_info as a
   inner join trade_info as b
     on a.minter = b.seller and a.nft_contract_address = b.nft_contract_address and a.nft_token_id = b.nft_token_id
-  group by 1
+  group by a.minter
   order by profit desc
 )
 
@@ -30,5 +30,4 @@ select distinct
 from mint_stat
 where mint_collection_count >= 2
   and ((mint_amount > 0 and profit / mint_amount >= 5) or (mint_amount = 0 and profit > 0))
-order by profit desc
 limit 100
